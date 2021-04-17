@@ -29,7 +29,7 @@ def gyro():
 
 # Fungsi membaca hasil sensor GPS dan mendekode hasil GPS
 def gps():  
-    my_gps = MicropyGPS()
+    my_gps = MicropyGPS() # Library penterjemah hasil gps 
     ser = serial.Serial ("/dev/ttyS0",9600,bytesize = serial.EIGHTBITS, stopbits = serial.STOPBITS_ONE, parity = serial.PARITY_NONE)  
     while True:
         my_sentence=ser.readline().decode("utf-8") #decode dulu ke string.   
