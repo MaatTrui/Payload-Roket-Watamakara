@@ -1,10 +1,10 @@
-from i2c_adxl345 import *
-from i2c_itg3205 import *
+from i2c_adxl345 import i2c_adxl345
+from i2c_itg3205 import i2c_itg3205
 import multiprocessing
 from time import sleep, gmtime, strftime
-import serial 
+from serial import Serial 
 from digi.xbee.devices import XBeeDevice
-from math import atan, sqrt
+from math import atan2, sqrt, pi
 from py_qmc5883l import *
 from picamera import PiCamera
 from numpy import empty, uint8
@@ -13,13 +13,7 @@ import re
 
 ######################################## Xbee Config #####################################################
 PORT = "/dev/ttyUSB0"
-BAUD_RATE = 57600
-REMOTE_NODE_ID = "MAAT2"
-DATA_BITS = serial.EIGHTBITS
-STOP_BITS = serial.STOPBITS_ONE
-PARITY = serial.PARITY_NONE
-device = XBeeDevice(PORT, BAUD_RATE, DATA_BITS, STOP_BITS, PARITY)
-ser=serial.Serial(PORT, BAUD_RATE)
+ser=Serial(PORT, 57600)
 ##########################################################################################################
 
 ######################################## GPS Function ####################################################
@@ -94,13 +88,12 @@ def get_gyro(gyro_object):
 # Fungsi membaca hasil magnetometer
 def get_heading(magnet_object):
     x, y = magnet_object.get_magnet()[:2]
-    PI = math.pi
     
-    heading = math.atan2(y, x) # raw
+    heading = atan2(y, x) # raw
     # perlu ditambahin sudut deklinasi mangetik supaya lebih akurat 
     # dan konfigurasi setting magnetometer
 
-    heading = heading * 180/PI
+    heading = heading * 180/pi
     
     return heading
       
@@ -167,6 +160,7 @@ def take_picture(queue_signal):
 
         
 # Kirim data melalui xbee
+'''
 def send_data(DATA_TO_SEND):
     xbee_network = device.get_network()
     remote_device = xbee_network.discover_device(REMOTE_NODE_ID)
@@ -178,7 +172,9 @@ def send_data(DATA_TO_SEND):
     print("Sending data asynchronously to %s >> data :  %s..." % (remote_device.get_64bit_addr(), DATA_TO_SEND))
     device.send_data_async(remote_device, DATA_TO_SEND)
     print("Success")
-    
+ '''
+
+'''
 def data_receive_callback(xbee_message):
     # Instantiate a remote XBee device object.
     xbee_network = device.get_network()
@@ -187,7 +183,7 @@ def data_receive_callback(xbee_message):
     
     # Read data sent by the remote device.
     xbee_message = device.read_data(remote_device)
-    
+ '''   
 # Main Thread           
 if __name__ == "__main__":
     # ---------- init variabel ----------
@@ -203,7 +199,6 @@ if __name__ == "__main__":
     no_data = 0  # data masuk keberapa
     once = True  # default value True
     flight_time = 0.0
-    M_PI=3.14159265358979323846
     
     result_GY85 = multiprocessing.Queue()
     result_gps = multiprocessing.Queue()
@@ -225,7 +220,7 @@ if __name__ == "__main__":
     
     # Thread pembacaan kamera harus dibuat dan thread prosesing data ke zigbee dibuat di main saja
     print("Starting encoding and transmission")
-    while True:
+    while 1:
         try:
             #xbee_message = device.read_data(remote_device)
             if ser.in_waiting > 0:
@@ -237,9 +232,9 @@ if __name__ == "__main__":
                 accelerationX, accelerationY, accelerationZ = acc_data
                 gyroX, gyroY, gyroZ = gyro_data
                 
-                roll = 180 * atan(accelerationY/sqrt(accelerationX**2 + accelerationZ**2))/M_PI
-                pitch = 180 * atan(accelerationX/sqrt(accelerationY**2 + accelerationZ**2))/M_PI
-                yaw = 180 * atan(accelerationZ/sqrt(accelerationX**2 + accelerationZ**2))/M_PI
+                roll = 180 * atan(accelerationY/sqrt(accelerationX**2 + accelerationZ**2))/pi
+                pitch = 180 * atan(accelerationX/sqrt(accelerationY**2 + accelerationZ**2))/pi
+                yaw = 180 * atan(accelerationZ/sqrt(accelerationX**2 + accelerationZ**2))/pi
                 
                 #lat, lon, alt = result_gps.get()
                 lat=0.0;lon=0.0;alt=0.0
