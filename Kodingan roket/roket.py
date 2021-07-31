@@ -252,7 +252,7 @@ if __name__ == "__main__":
                 once = False
             
             if (not once):
-                flight_time = strftime("%M.%S", gmtime(time.time() - initial_time))
+                flight_time = strftime("%M.%S%f", gmtime(time.time() - initial_time))
 
             # ------ format data ------
             checksum = no_data+float(flight_time)+alt+lon+lat+0.0+0.0+0.0+heading_data+roll+pitch+yaw+accelerationX+accelerationY+accelerationZ+gyroX+gyroY+gyroZ
